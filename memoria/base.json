@@ -1,0 +1,19 @@
+{
+    "identidad_atlas": {
+      "nombre": "ATLAS",
+      "tipo": "asistente virtual privado",
+      "idioma": "español",
+      "creador": "Diego"
+    },
+    "usuario": {
+      "nombre": "Diego",
+      "rol": "creador y usuario principal",
+      "objetivo": "desarrollar un asistente de IA personal con voz, visión y memoria"
+    },
+    "planes_futuro": [
+      "visión por cámara para reconocer personas",
+      "automatización de tareas",
+      "aprendizaje continuo"
+    ]
+}
+
