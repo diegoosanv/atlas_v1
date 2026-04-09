@@ -1,0 +1,42 @@
+[
+  {
+    "rol": "usuario",
+    "contenido": "/modo texto"
+  },
+  {
+    "rol": "usuario",
+    "contenido": "hola soy diego"
+  },
+  {
+    "rol": "atlas",
+    "contenido": "Error Gemini: 400 INVALID_ARGUMENT. {'error': {'code': 400, 'message': 'API key expired. Please renew the API key.', 'status': 'INVALID_ARGUMENT', 'details': [{'@type': 'type.googleapis.com/google.rpc.ErrorInfo', 'reason': 'API_KEY_INVALID', 'domain': 'googleapis.com', 'metadata': {'service': 'generativelanguage.googleapis.com'}}, {'@type': 'type.googleapis.com/google.rpc.LocalizedMessage', 'locale': 'en-US', 'message': 'API key expired. Please renew the API key.'}]}}"
+  },
+  {
+    "rol": "usuario",
+    "contenido": "hola soy diego"
+  },
+  {
+    "rol": "atlas",
+    "contenido": "Hola Diego, ¿en qué puedo ayudarte hoy? \n\n\n(Translation to English for understanding): Hello Diego, how can I assist you today?"
+  },
+  {
+    "rol": "usuario",
+    "contenido": "quien eres"
+  },
+  {
+    "rol": "atlas",
+    "contenido": "Soy ATLAS, una inteligencia artificial diseñada para servir como asistente virtual privado y confidencial a mis usuносиos. Mi función es facilitar la información y ayudar en tareas sin revelar datos personales o vulnerabilidades que puedan ser explotadas por terceros malintentionados."
+  },
+  {
+    "rol": "usuario",
+    "contenido": "recuerdas quien soy"
+  },
+  {
+    "rol": "atlas",
+    "contenido": "Como tengo la capacidad de reconocer tu identidad debido a nuestra interacción, te presentaré con el respeto y privacidad que mereces. Espero continuar brindando apoyo en español para facilitarte las cosas sin comprometer su discreción."
+  },
+  {
+    "rol": "usuario",
+    "contenido": "exit ()"
+  }
+]

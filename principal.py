@@ -1,8 +1,3 @@
-import threading
-
-import socket
-
-
 from voz.stt import escuchar
 
 from voz.tts import hablar
@@ -15,34 +10,26 @@ from ia.ollama_cliente import responder_offline
 from ia.gemini_cliente import responder_gemini
 
 
+from memoria.historial import agregar
+
+from memoria.recuerdos import guardar_si_importante
+
+
 from config import WAKE_WORD, USAR_CAMARA, USAR_TTS
 
 
-from interfaz.cara import loop, actualizar_estado
-
-
 from dotenv import load_dotenv
+import os 
+load_dotenv(dotenv_path="/home/diego/atlas_v1/.env")
 
-load_dotenv()
+
+import socket
 
 
-
-# ======================
-
-# CONFIG
-
-# ======================
-
+# modos
 
 modo = "chat"
 
-
-
-# ======================
-
-# INTERNET
-
-# ======================
 
 
 def hay_internet():
@@ -59,41 +46,32 @@ def hay_internet():
 
 
 
-# ======================
-
-# IA
-
-# ======================
-
-
 def obtener_respuesta(comando):
 
     try:
 
         if hay_internet():
 
-            return responder_gemini(comando)  # ONLINE
+            return responder_gemini(comando)
 
         else:
 
-            return responder_offline(comando)  # LOCAL
+            return responder_offline(comando)
 
     except Exception as e:
-        print ("Error online, usando offline:", e)
+
+        print("Error online, usando offline:", e)
+
         return responder_offline(comando)
 
 
 
-# ======================
-
-# CEREBRO (hilo)
-
-# ======================
-
-
-def cerebro():
+def main():
 
     global modo
+
+
+    print("ATLAS iniciado")
 
 
     if USAR_TTS:
@@ -102,9 +80,6 @@ def cerebro():
 
 
     while True:
-
-
-        actualizar_estado("idle")
 
 
         # ======================
@@ -116,9 +91,6 @@ def cerebro():
         if modo == "voz":
 
             print("Escuchando wake word...")
-
-            actualizar_estado("escuchando")
-
 
             texto = escuchar()
 
@@ -140,8 +112,6 @@ def cerebro():
 
                     hablar("Te escucho")
 
-
-                actualizar_estado("escuchando")
 
                 comando = escuchar()
 
@@ -171,9 +141,47 @@ def cerebro():
 
         # ======================
 
-        # SALIR
+        # MEMORIA
 
         # ======================
+
+        agregar("usuario", comando)
+
+        guardar_si_importante(comando)
+
+
+        # ======================
+
+        # COMANDOS DE SISTEMA
+
+        # ======================
+
+        if comando.startswith("/modo"):
+
+
+            if "voz" in comando:
+
+                modo = "voz"
+
+                print("Modo voz activado")
+
+
+            elif "texto" in comando:
+
+                modo = "texto"
+
+                print("Modo texto activado")
+
+
+            elif "chat" in comando:
+
+                modo = "chat"
+
+                print("Modo chat activado")
+
+
+            continue
+
 
         if comando == "/salir":
 
@@ -184,36 +192,7 @@ def cerebro():
 
         # ======================
 
-        # MODOS
-
-        # ======================
-
-        if comando.startswith("/modo"):
-
-            if "voz" in comando:
-
-                modo = "voz"
-
-                print("Modo voz activado")
-
-            elif "texto" in comando:
-
-                modo = "texto"
-
-                print("Modo texto activado")
-
-            elif "chat" in comando:
-
-                modo = "chat"
-
-                print("Modo chat activado")
-
-            continue
-
-
-        # ======================
-
-        # VISION
+        # VISION (opcional)
 
         # ======================
 
@@ -234,55 +213,26 @@ def cerebro():
 
         # ======================
 
-        actualizar_estado("pensando")
-
-
         respuesta = obtener_respuesta(comando)
+
+
+        # guardar respuesta
+
+        agregar("atlas", respuesta)
 
 
         print("ATLAS:", respuesta)
 
 
-        actualizar_estado("hablando")
-
-
         # ======================
 
-        # TTS
+        # VOZ
 
         # ======================
 
         if USAR_TTS and modo in ["voz", "texto"]:
 
             hablar(respuesta)
-
-
-        actualizar_estado("idle")
-
-
-
-# ======================
-
-# MAIN
-
-# ======================
-
-
-def main():
-
-    print("ATLAS iniciado")
-
-
-    #  hilo del cerebro
-
-    hilo = threading.Thread(target=cerebro, daemon=True)
-
-    hilo.start()
-
-
-    # pygame SIEMPRE en main thread
-
-    loop()
 
 
 
