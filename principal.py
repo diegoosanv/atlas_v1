@@ -1,3 +1,8 @@
+import socket
+
+import time
+
+
 from voz.stt import escuchar
 
 from voz.tts import hablar
@@ -10,23 +15,11 @@ from ia.ollama_cliente import responder_offline
 from ia.gemini_cliente import responder_gemini
 
 
-from memoria.historial import agregar
-
-from memoria.recuerdos import guardar_si_importante
-
-
 from config import WAKE_WORD, USAR_CAMARA, USAR_TTS
 
-
-from dotenv import load_dotenv
-import os 
-load_dotenv(dotenv_path="/home/diego/atlas_v1/.env")
+from interfaz.cara import iniciar_cara, actualizar_estado, actualizar_pantalla
 
 
-import socket
-
-
-# modos
 
 modo = "chat"
 
@@ -48,19 +41,19 @@ def hay_internet():
 
 def obtener_respuesta(comando):
 
-    try:
+    if hay_internet():
 
-        if hay_internet():
+        try:
 
             return responder_gemini(comando)
 
-        else:
+        except Exception as e:
+
+            print("Error online:", e)
 
             return responder_offline(comando)
 
-    except Exception as e:
-
-        print("Error online, usando offline:", e)
+    else:
 
         return responder_offline(comando)
 
@@ -74,61 +67,33 @@ def main():
     print("ATLAS iniciado")
 
 
+    # iniciar pygame en hilo principal
+
+    iniciar_cara()
+
+
     if USAR_TTS:
 
-        hablar("Atlas en linea.")
+        hablar("Atlas en línea.")
 
 
     while True:
 
 
-        # ======================
+        #  actualizar pantalla SIEMPRE
 
-        # MODO VOZ
-
-        # ======================
-
-        if modo == "voz":
-
-            print("Escuchando wake word...")
-
-            texto = escuchar()
-
-
-            if not texto:
-
-                continue
-
-
-            texto = texto.lower().strip()
-
-
-            if WAKE_WORD in texto:
-
-                print("ATLAS activado")
-
-
-                if USAR_TTS:
-
-                    hablar("Te escucho")
-
-
-                comando = escuchar()
-
-            else:
-
-                continue
+        actualizar_pantalla()
 
 
         # ======================
 
-        # MODO TEXTO / CHAT
+        # INPUT
 
         # ======================
 
-        else:
+        actualizar_estado("escuchando")
 
-            comando = input("Tu: ")
+        comando = input("Tu: ")
 
 
         if not comando:
@@ -141,23 +106,11 @@ def main():
 
         # ======================
 
-        # MEMORIA
-
-        # ======================
-
-        agregar("usuario", comando)
-
-        guardar_si_importante(comando)
-
-
-        # ======================
-
-        # COMANDOS DE SISTEMA
+        # COMANDOS
 
         # ======================
 
         if comando.startswith("/modo"):
-
 
             if "voz" in comando:
 
@@ -165,20 +118,17 @@ def main():
 
                 print("Modo voz activado")
 
-
             elif "texto" in comando:
 
                 modo = "texto"
 
                 print("Modo texto activado")
 
-
             elif "chat" in comando:
 
                 modo = "chat"
 
                 print("Modo chat activado")
-
 
             continue
 
@@ -192,7 +142,7 @@ def main():
 
         # ======================
 
-        # VISION (opcional)
+        # VISIÓN
 
         # ======================
 
@@ -213,12 +163,13 @@ def main():
 
         # ======================
 
+        actualizar_estado("pensando")
+
+
         respuesta = obtener_respuesta(comando)
 
 
-        # guardar respuesta
-
-        agregar("atlas", respuesta)
+        actualizar_estado("hablando")
 
 
         print("ATLAS:", respuesta)
@@ -226,13 +177,21 @@ def main():
 
         # ======================
 
-        # VOZ
+        # TTS
 
         # ======================
 
         if USAR_TTS and modo in ["voz", "texto"]:
 
             hablar(respuesta)
+
+
+        actualizar_estado("idle")
+
+
+        # pequeño delay para estabilidad
+
+        time.sleep(0.1)
 
 
 
